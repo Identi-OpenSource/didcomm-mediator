@@ -1,0 +1,25 @@
+{
+  "name": "didcomm-mediator",
+  "version": "1.0.0",
+  "description": "DIDComm mediator",
+  "author": "identi@identi-digital.org",
+  "source": "src/index.ts",
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "start": "NODE_ENV=production yarn veramo server --config=./config/agent.yml",
+    "dev": "yarn veramo server --config=./config/agent-local.yml",
+    "key": "veramo config create-secret-key",
+    "start:dev": "yarn veramo server",
+    "generate-plugin-schema": "yarn veramo dev generate-plugin-schema",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@veramo/cli": "^6.0.1-next.23",
+    "agent-explore": "^1.71.5"
+  },
+  "exports": {
+    ".": "./build/index.js"
+  }
+}
