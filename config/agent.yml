@@ -16,8 +16,8 @@ constants:
     $env: SECRET_KEY
   celoRPCUrl:
     $env: CELO_RPC_URL
-  celoCredentialRegistryAddress:
-    $env: CELO_CREDENTIAL_REGISTRY_ADDRESS
+  celoDIDRegistryAddress:
+    $env: CELO_DID_REGISTRY_ADDRESS
   databaseUrl:
     $env: DATABASE_URL
   messagingEndpoint:
@@ -188,7 +188,7 @@ ethr-did-resolver:
           rpcUrl:
             $ref: /constants/celoRPCUrl
           registry:
-            $ref: /constants/celoCredentialRegistryAddress
+            $ref: /constants/celoDIDRegistryAddress
 
 web-did-resolver:
   $require: web-did-resolver?t=function&p=/web#getResolver
@@ -230,7 +230,7 @@ didManager:
               rpcUrl:
                 $ref: /constants/celoRPCUrl
               registry:
-                $ref: /constants/celoCredentialRegistryAddress
+                $ref: /constants/celoDIDRegistryAddress
         did:web:
           $require: '@veramo/did-provider-web#WebDIDProvider'
           $args:

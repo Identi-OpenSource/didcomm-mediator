@@ -97,14 +97,14 @@ In the response look for the `blockchainAccountId` field, after `eip155:` this i
        "serviceEndpoint": "https://f53a-2800-e422-5546-8c81.ngrok-free.app/messaging"
      },
      "options": {
-       "ttl": 432000 // 5 days - You can change this value as needed
+       "ttl": 432000 // 5 days - You can change this value as needed or 31536000 for a year
      }
    }
    ```
 
 5. Add did manager key, You have to use two endpoints, one for create a key and another for add the key to the DID.
 
-   5.1. Create a key using `POST /didManagerCreateKey` endpoint
+   5.1. Create a key using `POST /keyManagerCreate` endpoint
 
    ```json
    {
@@ -120,7 +120,7 @@ In the response look for the `blockchainAccountId` field, after `eip155:` this i
      "did": "did:ethr:celo:0x...",
      "key": {}, // The response of the previous request
      "options": {
-       "ttl": 432000 // 5 days - You can change this value as needed
+       "ttl": 432000 // 5 days - You can change this value as needed or 31536000 for a year
      }
    }
    ```
@@ -135,8 +135,11 @@ You have to repeat all steps you for the sender and recipient DIDs. The only cha
 
 If you have remote Veramo agents you can use the following code to connect.
 
+Use the next repository to configure the agent. [Connection to the remote Node](https://github.com/Identi-OpenSource/connect-identi-node)
+
 ```js
 const response = await fetch(`${AGENT_OPEN_API}/open-api.json`);
+const schema = await response.json();
 const agent = createAgent({
   plugins: [
     new AgentRestClient({
@@ -158,7 +161,7 @@ const mediatorDID = 'did:ethr:celo:0x...';
 1. Create mediator connection
 
 ```js
-const createMediatorConnection = async (recipientDID: any) => {
+const createMediatorConnection = async (recipientDID) => {
   try {
     // Create mediate request
     const mediateRequestMessage = createV3MediateRequestMessage(
@@ -217,7 +220,7 @@ const createMediatorConnection = async (recipientDID: any) => {
 2. Ensure mediation granted
 
 ```js
-const ensureMediationGranted = async (recipientDID: string) => {
+const ensureMediationGranted = async (recipientDID) => {
   const request = createV3MediateRequestMessage(recipientDID, mediatorDID);
   const packedRequest = await agent.packDIDCommMessage({
     packing: 'authcrypt',
@@ -229,7 +232,7 @@ const ensureMediationGranted = async (recipientDID: string) => {
     messageId: request.id,
   });
 
-if (
+  if (
     mediationResponse.returnMessage?.type !== CoordinateMediation.MEDIATE_GRANT
   ) {
     throw new Error('mediation not granted');
@@ -250,10 +253,10 @@ if (
     messageId: update.id,
   });
 
-if (
+  if (
     updateResponse.returnMessage?.type !==
       CoordinateMediation.RECIPIENT_UPDATE_RESPONSE ||
-    (updateResponse.returnMessage?.data as any)?.updates[0].result !== 'success'
+    updateResponse.returnMessage?.data?.updates[0].result !== 'success'
   ) {
     throw new Error('mediation update failed');
   }
@@ -268,13 +271,13 @@ if (
 const senderDID = 'did:ethr:celo:0x...';
 const subjectDID = 'did:ethr:celo:0x...';
 
-const sendMessage = async (body: any, sender: any, subject: any) => {
+const sendMessage = async (body, sender, subject) => {
   try {
     const messageId = uuidv4();
-    const message: any = {
+    const message = {
       type: 'https://didcomm.org/basicmessage/2.0/message',
-      from: sender as string,
-      to: [subject as string],
+      from: sender,
+      to: [subject],
       id: messageId,
       body: body,
     };
@@ -288,10 +291,10 @@ const sendMessage = async (body: any, sender: any, subject: any) => {
       const result = await agent?.sendDIDCommMessage({
         messageId: messageId,
         packedMessage,
-        recipientDidUrl: subject as string,
+        recipientDidUrl: subject,
       });
 
-      return "Message sent";
+      return 'Message sent';
     }
     throw new Error('Error sending message');
   } catch (err) {
@@ -304,10 +307,10 @@ const sendMessage = async (body: any, sender: any, subject: any) => {
 
 ```js
 const did = 'did:ethr:celo:0x...';
-const receivedMessages = async (did: any) => {
+const receivedMessages = async (did) => {
   const deliveryRequest = createV3DeliveryRequestMessage(did, mediatorDID);
   const packedRequest = await agent.packDIDCommMessage({
-    packing: 'anoncrypt',
+    packing: 'authcrypt',
     message: deliveryRequest,
   });
   const deliveryResponse = await agent.sendDIDCommMessage({
